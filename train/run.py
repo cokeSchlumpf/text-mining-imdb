@@ -108,9 +108,19 @@ def random_forest_split(x_train, y_train):
 def logistic_regression(x_train, y_train, x_test, y_test):
     from sklearn.linear_model import LogisticRegression
 
-    reg = LogisticRegression(solver='lbfgs', max_iter = 1000)
+    reg = LogisticRegression(solver='lbfgs', max_iter = 1000, multi_class='multinomial', random_state=0)
     reg.fit(x_train, y_train)
     y_pred = reg.predict(x_test)
+
+    return metrics(y_test, y_pred)
+
+
+def svc(x_train, y_train, x_test, y_test):
+    from sklearn.svm import SVC
+
+    model = SVC(gamma='auto')
+    model.fit(x_train, y_train)
+    y_pred = model.predict(x_test)
 
     return metrics(y_test, y_pred)
 
@@ -168,7 +178,8 @@ def run():
     finalize_metrics({
         # "rf_metrics": random_forest(x_train, y_train, x_test, y_test),
         # "rf_split_metrics": random_forest_split(x_train, y_train)
-        "lr_metrics": logistic_regression(x_train, y_train, x_test, y_test)
+        # "lr_metrics": logistic_regression(x_train, y_train, x_test, y_test)
+        "svc_metrics": svc(x_train, y_train, x_test, y_test)
     })
 
     print('... done')
