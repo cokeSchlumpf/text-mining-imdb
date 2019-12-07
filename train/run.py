@@ -1,7 +1,11 @@
+import json
 import os
+import re
 import pandas as pd
+import numpy as np
 
 from sklearn.datasets import load_files
+from typing import List
 
 
 def load_data(directory_path: str) -> pd.DataFrame:
@@ -39,12 +43,96 @@ def load_training() -> pd.DataFrame:
     return positive.append(negative, ignore_index=True, sort=False)
 
 
-if __name__ == '__main__':
-    training_set = load_files("./data/train", categories=['pos', 'neg'])
-    X,y = training_set.data, training_set.target
+def prepare_text(s: str) -> str:
+    # Remove all the special characters
+    s = re.sub(r'\W', ' ', s)
+    # remove all single characters
+    s = re.sub(r'\s+[a-zA-Z]\s+', ' ', s)
+    # Remove single characters from the start
+    s = re.sub(r'\^[a-zA-Z]\s+', ' ', s)
+    # Substituting multiple spaces with single space
+    s = re.sub(r'\s+', ' ', s, flags=re.I)
+    # Converting to Lowercase
+    s = s.lower()
+    # Lemmatization
+    s = s.split()
+    s = ' '.join(s)
 
-    data = load_files('./data/foo', categories=['a', 'blums'])
-    print(type(data.data))
-    print(data)
-    #df = load_training()
-    #print(df.head())
+    return s
+
+
+def prepare_texts(documents: List[str]):
+    import nltk
+    from sklearn.feature_extraction.text import CountVectorizer
+    from sklearn.feature_extraction.text import TfidfTransformer
+
+    from nltk.corpus import stopwords
+
+    # download stopwords
+    nltk.download('stopwords')
+
+    vectorizer = CountVectorizer(max_features=1500, min_df=15, max_df=0.7, stop_words=stopwords.words('english'))
+    X = vectorizer.fit_transform(documents).toarray()
+
+    tfidfconverter = TfidfTransformer()
+    X = tfidfconverter.fit_transform(X).toarray()
+
+    return X
+
+
+def random_forest(x_train, y_train, x_test):
+    from sklearn.ensemble import RandomForestClassifier
+
+    clf = RandomForestClassifier(n_estimators=10, random_state=0)
+    clf.fit(x_train, y_train)
+    return clf.predict(x_test)
+
+
+def metrics(y_test, y_pred) -> dict:
+    from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+
+    confusion_matrix_value = confusion_matrix(y_test, y_pred).toList()
+    classification_report_value = classification_report(y_test, y_pred, output_dict=True)
+    accuracy_score_value = accuracy_score(y_test, y_pred)
+
+    print(type(confusion_matrix_value))
+    print(type(classification_report_value))
+    print(type(accuracy_score_value))
+
+    return {
+        'confusion_matrix': confusion_matrix_value,
+        'classification_report': classification_report_value,
+        'accuracy_score': accuracy_score_value
+    }
+
+
+def run():
+    print('... loading data')
+    training_set = load_files("./data/train", categories=['pos', 'neg'])
+    test_set = load_files("./data/test", categories=['pos', 'neg'])
+    documents_train, y_train = training_set.data, training_set.target
+    documents_test, y_test = test_set.data, test_set.target
+
+    print('... prepare')
+    documents_train = [prepare_text(c.decode('utf-8')) for c in documents_train]
+    documents_test = [prepare_text(c.decode('utf-8')) for c in documents_test]
+
+    print('... feature extraction')
+    x_train = prepare_texts(documents_train)
+    x_test = prepare_texts(documents_test)
+
+    print('... train and predict')
+    y_pred = random_forest(x_train, y_train, x_test)
+    m = metrics(y_test, y_pred)
+
+    print('... done')
+    print()
+
+    print(json.dumps(m, indent=2))
+
+    with open('model/metrics.json', 'w') as fp:
+        json.dump(m, fp, indent=2)
+
+
+if __name__ == '__main__':
+    run()
