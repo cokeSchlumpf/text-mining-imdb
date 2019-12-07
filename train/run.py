@@ -44,6 +44,7 @@ def load_training() -> pd.DataFrame:
 
 def prepare_text(s: str) -> str:
     from nltk.stem import WordNetLemmatizer
+    stemmer = WordNetLemmatizer()
 
     # Remove all the special characters
     s = re.sub(r'\W', ' ', s)
@@ -62,20 +63,17 @@ def prepare_text(s: str) -> str:
 
     # Lemmatization
     s = s.split()
+    s = [stemmer.lemmatize(word) for word in s]
     s = ' '.join(s)
 
     return s
 
 
 def prepare_texts(documents: List[str]):
-    import nltk
     from sklearn.feature_extraction.text import CountVectorizer
     from sklearn.feature_extraction.text import TfidfTransformer
 
     from nltk.corpus import stopwords
-
-    # download stopwords
-    nltk.download('stopwords')
 
     vectorizer = CountVectorizer(max_features=500, min_df=15, max_df=0.7, stop_words=stopwords.words('english'))
     X = vectorizer.fit_transform(documents).toarray()
@@ -132,6 +130,12 @@ def finalize_metrics(m):
 
 
 def run():
+    import nltk
+
+    # download nltk data
+    nltk.download('stopwords')
+    nltk.download('wordnet')
+
     print('... loading data')
     training_set = load_files("./data/train", categories=['pos', 'neg'])
     test_set = load_files("./data/test", categories=['pos', 'neg'])
@@ -148,14 +152,14 @@ def run():
 
     print('... train and predict')
     rf_metrics = random_forest(x_train, y_train, x_test, y_test)
-    rf_split_metrics = random_forest_split(x_train, y_train)
+    # rf_split_metrics = random_forest_split(x_train, y_train)
 
     print('... done')
     print()
 
     finalize_metrics({
         "rf_metrics": rf_metrics,
-        "rf_split_metrics": rf_split_metrics
+        # "rf_split_metrics": rf_split_metrics
     })
 
 
