@@ -107,10 +107,11 @@ def random_forest_split(x_train, y_train):
 
 def logistic_regression(x_train, y_train, x_test, y_test):
     from sklearn.linear_model import LogisticRegression
-    s
-    logreg = LogisticRegression(solver='lbfgs', max_iter = 1000)
-    logreg.fit(x_train, y_train)
-    y_pred = logreg.predict(x_test)
+
+    reg = LogisticRegression(solver='lbfgs', max_iter = 1000)
+    reg.fit(x_train, y_train)
+    y_pred = reg.predict(x_test)
+
     return metrics(y_test, y_pred)
 
 
@@ -164,16 +165,14 @@ def run():
     x_test = prepare_texts(documents_test)
 
     print('... train and predict')
-    rf_metrics = random_forest(x_train, y_train, x_test, y_test)
-    # rf_split_metrics = random_forest_split(x_train, y_train)
+    finalize_metrics({
+        # "rf_metrics": random_forest(x_train, y_train, x_test, y_test),
+        # "rf_split_metrics": random_forest_split(x_train, y_train)
+        "lr_metrics": logistic_regression(x_train, y_train, x_test, y_test)
+    })
 
     print('... done')
     print()
-
-    finalize_metrics({
-        "rf_metrics": rf_metrics,
-        # "rf_split_metrics": rf_split_metrics
-    })
 
 
 if __name__ == '__main__':
