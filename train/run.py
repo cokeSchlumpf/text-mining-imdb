@@ -47,8 +47,8 @@ def prepare_text(s: str) -> str:
     stemmer = WordNetLemmatizer()
 
     # Remove HTML tags
-    clean = re.compile('<.*?>')
-    s = re.sub(clean, ' ', s)
+    # clean = re.compile('<.*?>')
+    # s = re.sub(clean, ' ', s)
 
     # Remove all the special characters
     s = re.sub(r'\W', ' ', s)
@@ -103,6 +103,15 @@ def random_forest_split(x_train, y_train):
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.2, random_state=0)
 
     return random_forest(x_train, y_train, x_test, y_test)
+
+
+def logistic_regression(x_train, y_train, x_test, y_test):
+    from sklearn.linear_model import LogisticRegression
+    s
+    logreg = LogisticRegression(solver='lbfgs', max_iter = 1000)
+    logreg.fit(x_train, y_train)
+    y_pred = logreg.predict(x_test)
+    return metrics(y_test, y_pred)
 
 
 def metrics(y_test, y_pred) -> dict:
