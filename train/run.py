@@ -40,6 +40,11 @@ def load_training() -> pd.DataFrame:
 
 
 if __name__ == '__main__':
-    print(load_files('./data/foo', categories=['a', 'blums']))
+    training_set = load_files("./data/train", categories=['pos', 'neg'])
+    X,y = training_set.data, training_set.target
+
+    data = load_files('./data/foo', categories=['a', 'blums'])
+    print(type(data.data))
+    print(data)
     #df = load_training()
     #print(df.head())
