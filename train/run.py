@@ -79,7 +79,7 @@ def prepare_texts(documents: List[str]):
 
     from nltk.corpus import stopwords
 
-    vectorizer = CountVectorizer(max_features=500, min_df=15, max_df=0.7, stop_words=stopwords.words('english'))
+    vectorizer = CountVectorizer(max_features=500, min_df=15, max_df=0.7, stop_words=stopwords.words('english'), ngram_range=(1,2))
     X = vectorizer.fit_transform(documents).toarray()
 
     tfidfconverter = TfidfTransformer()
@@ -176,10 +176,10 @@ def run():
 
     print('... train and predict')
     finalize_metrics({
-        # "rf_metrics": random_forest(x_train, y_train, x_test, y_test),
-        # "rf_split_metrics": random_forest_split(x_train, y_train)
-        # "lr_metrics": logistic_regression(x_train, y_train, x_test, y_test)
-        "svc_metrics": svc(x_train, y_train, x_test, y_test)
+        #"rf_metrics": random_forest(x_train, y_train, x_test, y_test),
+        #"rf_split_metrics": random_forest_split(x_train, y_train)
+        "lr_metrics": logistic_regression(x_train, y_train, x_test, y_test)
+        #"svc_metrics": svc(x_train, y_train, x_test, y_test)
     })
 
     print('... done')
