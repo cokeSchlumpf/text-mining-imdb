@@ -46,6 +46,10 @@ def prepare_text(s: str) -> str:
     from nltk.stem import WordNetLemmatizer
     stemmer = WordNetLemmatizer()
 
+    # Remove HTML tags
+    clean = re.compile('<.*?>')
+    s = re.sub(clean, ' ', s)
+
     # Remove all the special characters
     s = re.sub(r'\W', ' ', s)
 

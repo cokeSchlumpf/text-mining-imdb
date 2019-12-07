@@ -2,3 +2,4 @@ model
 data
 .idea
 
+__pycache__
