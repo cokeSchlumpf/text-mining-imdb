@@ -43,6 +43,8 @@ def load_training() -> pd.DataFrame:
 
 
 def prepare_text(s: str) -> str:
+    from nltk.stem import WordNetLemmatizer
+
     # Remove all the special characters
     s = re.sub(r'\W', ' ', s)
 
