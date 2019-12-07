@@ -45,14 +45,19 @@ def load_training() -> pd.DataFrame:
 def prepare_text(s: str) -> str:
     # Remove all the special characters
     s = re.sub(r'\W', ' ', s)
+
     # remove all single characters
     s = re.sub(r'\s+[a-zA-Z]\s+', ' ', s)
+
     # Remove single characters from the start
     s = re.sub(r'\^[a-zA-Z]\s+', ' ', s)
+
     # Substituting multiple spaces with single space
     s = re.sub(r'\s+', ' ', s, flags=re.I)
+
     # Converting to Lowercase
     s = s.lower()
+
     # Lemmatization
     s = s.split()
     s = ' '.join(s)
@@ -70,7 +75,7 @@ def prepare_texts(documents: List[str]):
     # download stopwords
     nltk.download('stopwords')
 
-    vectorizer = CountVectorizer(max_features=1500, min_df=15, max_df=0.7, stop_words=stopwords.words('english'))
+    vectorizer = CountVectorizer(max_features=500, min_df=15, max_df=0.7, stop_words=stopwords.words('english'))
     X = vectorizer.fit_transform(documents).toarray()
 
     tfidfconverter = TfidfTransformer()
@@ -79,12 +84,21 @@ def prepare_texts(documents: List[str]):
     return X
 
 
-def random_forest(x_train, y_train, x_test):
+def random_forest(x_train, y_train, x_test, y_test):
     from sklearn.ensemble import RandomForestClassifier
 
     clf = RandomForestClassifier(n_estimators=10, random_state=0)
     clf.fit(x_train, y_train)
-    return clf.predict(x_test)
+
+    y_pred = clf.predict(x_test)
+    return metrics(y_test, y_pred)
+
+
+def random_forest_split(x_train, y_train):
+    from sklearn.model_selection import train_test_split
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.2, random_state=0)
+
+    return random_forest(x_train, y_train, x_test, y_test)
 
 
 def metrics(y_test, y_pred) -> dict:
@@ -131,13 +145,16 @@ def run():
     x_test = prepare_texts(documents_test)
 
     print('... train and predict')
-    y_pred = random_forest(x_train, y_train, x_test)
-    m = metrics(y_test, y_pred)
+    rf_metrics = random_forest(x_train, y_train, x_test, y_test)
+    rf_split_metrics = random_forest_split(x_train, y_train)
 
     print('... done')
     print()
 
-    finalize_metrics(m)
+    finalize_metrics({
+        "rf_metrics": rf_metrics,
+        "rf_split_metrics": rf_split_metrics
+    })
 
 
 if __name__ == '__main__':
