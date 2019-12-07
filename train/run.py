@@ -2,7 +2,6 @@ import json
 import os
 import re
 import pandas as pd
-import numpy as np
 
 from sklearn.datasets import load_files
 from typing import List
@@ -91,7 +90,7 @@ def random_forest(x_train, y_train, x_test):
 def metrics(y_test, y_pred) -> dict:
     from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 
-    confusion_matrix_value = confusion_matrix(y_test, y_pred).toList()
+    confusion_matrix_value = confusion_matrix(y_test, y_pred).tolist()
     classification_report_value = classification_report(y_test, y_pred, output_dict=True)
     accuracy_score_value = accuracy_score(y_test, y_pred)
 
