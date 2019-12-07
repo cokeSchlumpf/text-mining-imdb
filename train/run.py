@@ -105,6 +105,16 @@ def metrics(y_test, y_pred) -> dict:
     }
 
 
+def finalize_metrics(m):
+    if not os.path.exists('model'):
+        os.makedirs('model')
+
+    print(json.dumps(m, indent=2))
+
+    with open('model/metrics.json', 'w') as fp:
+        json.dump(m, fp, indent=2)
+
+
 def run():
     print('... loading data')
     training_set = load_files("./data/train", categories=['pos', 'neg'])
@@ -127,10 +137,7 @@ def run():
     print('... done')
     print()
 
-    print(json.dumps(m, indent=2))
-
-    with open('model/metrics.json', 'w') as fp:
-        json.dump(m, fp, indent=2)
+    finalize_metrics(m)
 
 
 if __name__ == '__main__':
