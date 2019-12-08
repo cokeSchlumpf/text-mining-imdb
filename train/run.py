@@ -142,7 +142,7 @@ def prepare_texts(documents: List[str]):
 def prepare_texts_binary(documents: List[str]):
     from sklearn.feature_extraction.text import CountVectorizer
 
-    cv = CountVectorizer(max_features=500, binary=False, ngram_range=(1,3))
+    cv = CountVectorizer(max_features=500, binary=False, ngram_range=(1,1))
     cv.fit(documents)
 
     x = cv.transform(documents).toarray()
@@ -151,7 +151,13 @@ def prepare_texts_binary(documents: List[str]):
 
 
 def prepare_texts_tfidf(documents: List[str]):
-    from sklearn.feature_extraction.text import TfidfTransformer
+    from sklearn.feature_extraction.text import TfidfVectorizer
+
+    tfidf_vectorizer = TfidfVectorizer()
+    tfidf_vectorizer.fit(documents)
+    x = tfidf_vectorizer.transform(documents)
+
+    return x
 
 
 def random_forest(x_train, y_train, x_test, y_test):
