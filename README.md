@@ -6,7 +6,7 @@ Download the [dataset](http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.t
 
 ## Summary of metrics
 
-```json
+```
 working tree:
 	model/metrics.json:
 		{

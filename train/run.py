@@ -97,6 +97,11 @@ def prepare_text(s: str) -> str:
 
 
 def prepare_text_simplified(s: str) -> str:
+    from nltk.corpus import stopwords
+    english_stop_words = stopwords.words('english')
+
+    # remove stopwords
+    s = ' '.join([word for word in s.split() if word not in english_stop_words])
     s = s.lower()
     s = re.sub(REPLACE_NO_SPACE, '', s)
     s = re.sub(REPLACE_WITH_SPACE, ' ', s)
@@ -154,7 +159,7 @@ def logistic_regression(x_train, y_train, x_test, y_test):
 
     x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, train_size=0.75)
 
-    reg = LogisticRegression(C=0.25, solver='lbfgs', multi_class='multinomial', random_state=0)
+    reg = LogisticRegression(C=0.25, max_iter=500, solver='lbfgs', multi_class='multinomial', random_state=0)
     reg.fit(x_train, y_train)
     y_pred = reg.predict(x_val)
 
@@ -226,7 +231,7 @@ def run():
     documents_train, y_train = read_data('./data/train')
     documents_test, y_test = read_data('./data/test')
 
-    [print(d) for d in documents_train[:3]]
+    [print(f"${d}\n\n--\n\n") for d in documents_train[:3]]
 
     print('... feature extraction')
     x_train = prepare_texts_binary(documents_train)
@@ -236,8 +241,8 @@ def run():
     finalize_metrics({
         #"rf_metrics": random_forest(x_train, y_train, x_test, y_test),
         #"rf_split_metrics": random_forest_split(x_train, y_train)
-        #"lr_metrics": logistic_regression(x_train, y_train, x_test, y_test),
-        "lr_optimized": logistic_regression_optimized(x_train, y_train, x_test, y_test),
+        "lr_metrics": logistic_regression(x_train, y_train, x_test, y_test),
+        #"lr_optimized": logistic_regression_optimized(x_train, y_train, x_test, y_test),
         #"svc_metrics": svc(x_train, y_train, x_test, y_test)
     })
 
