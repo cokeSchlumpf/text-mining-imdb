@@ -100,7 +100,7 @@ def prepare_text_simplified(s: str) -> str:
     s = s.lower()
     s = re.sub(REPLACE_NO_SPACE, '', s)
     s = re.sub(REPLACE_WITH_SPACE, ' ', s)
-    s = str.join(' ', s.split()[:20])
+    s = str.join(' ', s.split()[:50])
 
     return s
 
@@ -154,7 +154,7 @@ def logistic_regression(x_train, y_train, x_test, y_test):
 
     x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, train_size=0.75)
 
-    reg = LogisticRegression(C=1)
+    reg = LogisticRegression(C=0.25, solver='lbfgs', multi_class='multinomial', random_state=0)
     reg.fit(x_train, y_train)
     y_pred = reg.predict(x_val)
 
@@ -165,8 +165,12 @@ def logistic_regression_optimized(x_train, y_train, x_test, y_test):
     from sklearn.linear_model import LogisticRegression
     from sklearn.model_selection import GridSearchCV
 
+    from sklearn.model_selection import train_test_split
+
+    x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, train_size=0.75)
+
     param_grid = {
-        'C': [0.5, 1],
+        'C': [0.25, 0.5, 0.75, 1],
         'max_iter': [500]
     }
 
@@ -177,9 +181,9 @@ def logistic_regression_optimized(x_train, y_train, x_test, y_test):
     grid.fit(x_train, y_train)
     print(f"... Grid Search - Best parameters:\n{grid.best_params_}")
 
-    y_pred = grid.best_estimator_.predict(x_test)
+    y_pred = grid.best_estimator_.predict(x_val)
 
-    return metrics(y_test, y_pred)
+    return metrics(y_val, y_pred)
 
 
 def svc(x_train, y_train, x_test, y_test):
@@ -232,8 +236,8 @@ def run():
     finalize_metrics({
         #"rf_metrics": random_forest(x_train, y_train, x_test, y_test),
         #"rf_split_metrics": random_forest_split(x_train, y_train)
-        "lr_metrics": logistic_regression(x_train, y_train, x_test, y_test),
-        #"lr_optimized": logistic_regression_optimized(x_train, y_train, x_test, y_test),
+        #"lr_metrics": logistic_regression(x_train, y_train, x_test, y_test),
+        "lr_optimized": logistic_regression_optimized(x_train, y_train, x_test, y_test),
         #"svc_metrics": svc(x_train, y_train, x_test, y_test)
     })
 
