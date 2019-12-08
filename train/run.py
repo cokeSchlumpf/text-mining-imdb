@@ -101,7 +101,8 @@ def prepare_text_simplified(s: str) -> str:
     from nltk.stem.porter import PorterStemmer
     from nltk.stem import WordNetLemmatizer
 
-    english_stop_words = stopwords.words('english')
+    #english_stop_words = stopwords.words('english')
+    english_stop_words = stop_words = ['in', 'of', 'at', 'a', 'the']
     stemmer = PorterStemmer()
     lemmatizer = WordNetLemmatizer()
 
@@ -130,7 +131,7 @@ def prepare_texts(documents: List[str]):
 
     from nltk.corpus import stopwords
 
-    vectorizer = CountVectorizer(max_features=500, min_df=0, max_df=0.7, stop_words=stopwords.words('english'), ngram_range=(1,1))
+    vectorizer = CountVectorizer(max_features=500, min_df=0, max_df=0.7, stop_words=stopwords.words('english'), ngram_range=(1,3))
     X = vectorizer.fit_transform(documents).toarray()
 
     tfidfconverter = TfidfTransformer()
@@ -142,7 +143,7 @@ def prepare_texts(documents: List[str]):
 def prepare_texts_binary(documents: List[str]):
     from sklearn.feature_extraction.text import CountVectorizer
 
-    cv = CountVectorizer(max_features=500, binary=False, ngram_range=(1,1))
+    cv = CountVectorizer(max_features=500, binary=False, ngram_range=(1,3))
     cv.fit(documents)
 
     x = cv.transform(documents).toarray()

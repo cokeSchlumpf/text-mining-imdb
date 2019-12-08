@@ -1,14 +1,14 @@
-md5: aed97997507acea62d4ef5a966a20df0
+md5: d5682e5db66d1a2931fd4e2f01bb15a1
 cmd: python train/run.py
 deps:
 - md5: bb36567cd3d8e253d49b030ce2f18534.dir
   path: data/train
 - md5: f3ddc6bb83470df8f5a653f7f7f5aa7e.dir
   path: data/test
-- md5: 810a49f5555b71b0502ab39ea7c59d88
+- md5: e696efd26d5ecb7fe74b2d9b543687ee
   path: train/run.py
 outs:
-- md5: ab560260f1bc72fba4b4e9dbf47bbe51
+- md5: 28e4451a237f050d1f26227b9800832e
   path: model/metrics.json
   cache: true
   metric: true
