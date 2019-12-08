@@ -7,6 +7,18 @@ from sklearn.datasets import load_files
 from typing import List
 
 
+REPLACE_NO_SPACE = re.compile("[.;:!\'?,\"()\[\]]")
+REPLACE_WITH_SPACE = re.compile("(<br\s*/><br\s*/>)|(\-)|(\/)")
+
+
+def initialize_nltk():
+    import nltk
+
+    # download nltk data
+    nltk.download('stopwords')
+    nltk.download('wordnet')
+
+
 def load_data(directory_path: str) -> pd.DataFrame:
     """
     Loads all text files from a provided directory into a Pandas Data Frame containing the text and the filename.
@@ -42,6 +54,14 @@ def load_training() -> pd.DataFrame:
     return positive.append(negative, ignore_index=True, sort=False)
 
 
+def read_data(directory: str):
+    data = load_files(directory, categories=['pos', 'neg'])
+    documents, y = data.data, data.target
+    documents = [prepare_text_simplified(c.decode('utf-8')) for c in documents]
+
+    return documents, y
+
+
 def prepare_text(s: str) -> str:
     from nltk.stem import WordNetLemmatizer
     stemmer = WordNetLemmatizer()
@@ -49,6 +69,9 @@ def prepare_text(s: str) -> str:
     # Remove HTML tags
     # clean = re.compile('<.*?>')
     # s = re.sub(clean, ' ', s)
+
+    # s = re.sub(REPLACE_NO_SPACE, '', s)
+    # s = re.sub(REPLACE_WITH_SPACE, ' ', s)
 
     # Remove all the special characters
     s = re.sub(r'\W', ' ', s)
@@ -73,6 +96,15 @@ def prepare_text(s: str) -> str:
     return s
 
 
+def prepare_text_simplified(s: str) -> str:
+    s = s.lower()
+    s = re.sub(REPLACE_NO_SPACE, '', s)
+    s = re.sub(REPLACE_WITH_SPACE, ' ', s)
+    s = str.join(' ', s.split()[:20])
+
+    return s
+
+
 def prepare_texts(documents: List[str]):
     from sklearn.feature_extraction.text import CountVectorizer
     from sklearn.feature_extraction.text import TfidfTransformer
@@ -83,9 +115,20 @@ def prepare_texts(documents: List[str]):
     X = vectorizer.fit_transform(documents).toarray()
 
     tfidfconverter = TfidfTransformer()
-    X = tfidfconverter.fit_transform(X).toarray()
+    X = tfidfconverter.fit_transform(X)
 
     return X
+
+
+def prepare_texts_binary(documents: List[str]):
+    from sklearn.feature_extraction.text import CountVectorizer
+
+    cv = CountVectorizer(binary=True)
+    cv.fit(documents)
+
+    x = cv.transform(documents).toarray()
+
+    return x
 
 
 def random_forest(x_train, y_train, x_test, y_test):
@@ -107,10 +150,34 @@ def random_forest_split(x_train, y_train):
 
 def logistic_regression(x_train, y_train, x_test, y_test):
     from sklearn.linear_model import LogisticRegression
+    from sklearn.model_selection import train_test_split
 
-    reg = LogisticRegression(solver='lbfgs', max_iter = 1000, multi_class='multinomial', random_state=0)
+    x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, train_size=0.75)
+
+    reg = LogisticRegression(C=1)
     reg.fit(x_train, y_train)
-    y_pred = reg.predict(x_test)
+    y_pred = reg.predict(x_val)
+
+    return metrics(y_val, y_pred)
+
+
+def logistic_regression_optimized(x_train, y_train, x_test, y_test):
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.model_selection import GridSearchCV
+
+    param_grid = {
+        'C': [0.5, 1],
+        'max_iter': [500]
+    }
+
+    model = LogisticRegression(solver='lbfgs', multi_class='multinomial', random_state=0)
+    grid = GridSearchCV(estimator=model, param_grid=param_grid, verbose=10)
+
+    print('... Logistic Regression with Grid Search')
+    grid.fit(x_train, y_train)
+    print(f"... Grid Search - Best parameters:\n{grid.best_params_}")
+
+    y_pred = grid.best_estimator_.predict(x_test)
 
     return metrics(y_test, y_pred)
 
@@ -132,10 +199,6 @@ def metrics(y_test, y_pred) -> dict:
     classification_report_value = classification_report(y_test, y_pred, output_dict=True)
     accuracy_score_value = accuracy_score(y_test, y_pred)
 
-    print(type(confusion_matrix_value))
-    print(type(classification_report_value))
-    print(type(accuracy_score_value))
-
     return {
         'confusion_matrix': confusion_matrix_value,
         'classification_report': classification_report_value,
@@ -154,31 +217,23 @@ def finalize_metrics(m):
 
 
 def run():
-    import nltk
+    initialize_nltk()
+    print('... loading and prepare data')
+    documents_train, y_train = read_data('./data/train')
+    documents_test, y_test = read_data('./data/test')
 
-    # download nltk data
-    nltk.download('stopwords')
-    nltk.download('wordnet')
-
-    print('... loading data')
-    training_set = load_files("./data/train", categories=['pos', 'neg'])
-    test_set = load_files("./data/test", categories=['pos', 'neg'])
-    documents_train, y_train = training_set.data, training_set.target
-    documents_test, y_test = test_set.data, test_set.target
-
-    print('... prepare')
-    documents_train = [prepare_text(c.decode('utf-8')) for c in documents_train]
-    documents_test = [prepare_text(c.decode('utf-8')) for c in documents_test]
+    [print(d) for d in documents_train[:3]]
 
     print('... feature extraction')
-    x_train = prepare_texts(documents_train)
-    x_test = prepare_texts(documents_test)
+    x_train = prepare_texts_binary(documents_train)
+    x_test = prepare_texts_binary(documents_test)
 
     print('... train and predict')
     finalize_metrics({
         #"rf_metrics": random_forest(x_train, y_train, x_test, y_test),
         #"rf_split_metrics": random_forest_split(x_train, y_train)
-        "lr_metrics": logistic_regression(x_train, y_train, x_test, y_test)
+        "lr_metrics": logistic_regression(x_train, y_train, x_test, y_test),
+        #"lr_optimized": logistic_regression_optimized(x_train, y_train, x_test, y_test),
         #"svc_metrics": svc(x_train, y_train, x_test, y_test)
     })
 
