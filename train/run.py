@@ -130,7 +130,7 @@ def prepare_texts(documents: List[str]):
 
     from nltk.corpus import stopwords
 
-    vectorizer = CountVectorizer(max_features=500, min_df=0, max_df=0.7, stop_words=stopwords.words('english'), ngram_range=(1,3))
+    vectorizer = CountVectorizer(max_features=500, min_df=0, max_df=0.7, stop_words=stopwords.words('english'), ngram_range=(1,2))
     X = vectorizer.fit_transform(documents).toarray()
 
     tfidfconverter = TfidfTransformer()
@@ -142,7 +142,7 @@ def prepare_texts(documents: List[str]):
 def prepare_texts_binary(documents: List[str]):
     from sklearn.feature_extraction.text import CountVectorizer
 
-    cv = CountVectorizer(max_features=500, binary=True, ngram_range=(1,2))
+    cv = CountVectorizer(max_features=500, binary=True, ngram_range=(1,3))
     cv.fit(documents)
 
     x = cv.transform(documents).toarray()
