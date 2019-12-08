@@ -169,9 +169,16 @@ def logistic_regression(x_train, y_train, x_test, y_test):
 
     reg = LogisticRegression(C=0.25, max_iter=500, solver='lbfgs', multi_class='multinomial', random_state=0)
     reg.fit(x_train, y_train)
-    y_pred = reg.predict(x_val)
 
-    return metrics(y_val, y_pred)
+    print('... training done.')
+
+    y_val_pred = reg.predict(x_val)
+    y_test_pred = reg.predict(x_test)
+
+    return {
+        'validation': metrics(y_val, y_val_pred),
+        'test': metrics(y_test, y_test_pred)
+    }
 
 
 def logistic_regression_optimized(x_train, y_train, x_test, y_test):
@@ -194,9 +201,13 @@ def logistic_regression_optimized(x_train, y_train, x_test, y_test):
     grid.fit(x_train, y_train)
     print(f"... Grid Search - Best parameters:\n{grid.best_params_}")
 
-    y_pred = grid.best_estimator_.predict(x_val)
+    y_val_pred = grid.best_estimator_.predict(x_val)
+    y_test_pred = grid.best_estimator_.predict(x_test)
 
-    return metrics(y_val, y_pred)
+    return {
+        'validation': metrics(y_val, y_val_pred),
+        'test': metrics(y_test, y_test_pred)
+    }
 
 
 def svc(x_train, y_train, x_test, y_test):
@@ -242,8 +253,9 @@ def run():
     [print(f"{d}\n\n--\n\n") for d in documents_train[:3]]
 
     print('... feature extraction')
-    x_train = prepare_texts_binary(documents_train)
-    x_test = prepare_texts_binary(documents_test)
+    x_all = prepare_texts_binary(documents_train + documents_test)
+    x_train = x_all[:len(documents_train)]
+    x_test = x_all[len(documents_train):]
 
     print('... train and predict')
     finalize_metrics({
