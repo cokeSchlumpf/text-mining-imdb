@@ -130,7 +130,7 @@ def prepare_texts(documents: List[str]):
 
     from nltk.corpus import stopwords
 
-    vectorizer = CountVectorizer(max_features=500, min_df=0, max_df=0.7, stop_words=stopwords.words('english'), ngram_range=(1,2))
+    vectorizer = CountVectorizer(max_features=500, min_df=0, max_df=0.7, stop_words=stopwords.words('english'), ngram_range=(1,1))
     X = vectorizer.fit_transform(documents).toarray()
 
     tfidfconverter = TfidfTransformer()
@@ -148,6 +148,10 @@ def prepare_texts_binary(documents: List[str]):
     x = cv.transform(documents).toarray()
 
     return x
+
+
+def prepare_texts_tfidf(documents: List[str]):
+    from sklearn.feature_extraction.text import TfidfTransformer
 
 
 def random_forest(x_train, y_train, x_test, y_test):
