@@ -98,13 +98,21 @@ def prepare_text(s: str) -> str:
 
 def prepare_text_simplified(s: str) -> str:
     from nltk.corpus import stopwords
+    from nltk.stem.porter import PorterStemmer
+    from nltk.stem import WordNetLemmatizer
+
     english_stop_words = stopwords.words('english')
+    stemmer = PorterStemmer()
+    lemmatizer = WordNetLemmatizer()
 
     # remove stopwords
-    s = ' '.join([word for word in s.split() if word not in english_stop_words])
     s = s.lower()
+    s = str.join(' ', s.split()[:150])
     s = re.sub(REPLACE_NO_SPACE, '', s)
     s = re.sub(REPLACE_WITH_SPACE, ' ', s)
+    s = ' '.join([word for word in s.split() if word not in english_stop_words])
+    s = ' '.join([stemmer.stem(word) for word in s.split()])
+    s = ' '.join([lemmatizer.lemmatize(word) for word in s.split()])
     s = str.join(' ', s.split()[:50])
 
     return s
@@ -231,7 +239,7 @@ def run():
     documents_train, y_train = read_data('./data/train')
     documents_test, y_test = read_data('./data/test')
 
-    [print(f"${d}\n\n--\n\n") for d in documents_train[:3]]
+    [print(f"{d}\n\n--\n\n") for d in documents_train[:3]]
 
     print('... feature extraction')
     x_train = prepare_texts_binary(documents_train)
