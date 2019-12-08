@@ -142,11 +142,14 @@ def prepare_texts(documents: List[str]):
 
 def prepare_texts_binary(documents: List[str]):
     from sklearn.feature_extraction.text import CountVectorizer
+    from sklearn.feature_extraction.text import TfidfTransformer
 
     cv = CountVectorizer(max_features=500, binary=False, ngram_range=(1,3))
     cv.fit(documents)
 
     x = cv.transform(documents).toarray()
+    tfidfconverter = TfidfTransformer()
+    x = tfidfconverter.fit_transform(x)
 
     return x
 
@@ -154,7 +157,7 @@ def prepare_texts_binary(documents: List[str]):
 def prepare_texts_tfidf(documents: List[str]):
     from sklearn.feature_extraction.text import TfidfVectorizer
 
-    tfidf_vectorizer = TfidfVectorizer()
+    tfidf_vectorizer = TfidfVectorizer(ngram_range=(1,3), binary=True)
     tfidf_vectorizer.fit(documents)
     x = tfidf_vectorizer.transform(documents)
 
