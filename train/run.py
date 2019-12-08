@@ -142,7 +142,7 @@ def prepare_texts(documents: List[str]):
 def prepare_texts_binary(documents: List[str]):
     from sklearn.feature_extraction.text import CountVectorizer
 
-    cv = CountVectorizer(max_features=500, binary=True, ngram_range=(1,3))
+    cv = CountVectorizer(max_features=500, binary=False, ngram_range=(1,3))
     cv.fit(documents)
 
     x = cv.transform(documents).toarray()
