@@ -227,13 +227,23 @@ def logistic_regression_optimized(x_train, y_train, x_test, y_test):
 
 
 def svc(x_train, y_train, x_test, y_test):
-    from sklearn.svm import SVC
+    from sklearn.svm import LinearSVC
+    from sklearn.model_selection import train_test_split
 
-    model = SVC(gamma='auto')
+    x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, train_size=0.75)
+
+    model = LinearSVC(C=0.1)
     model.fit(x_train, y_train)
-    y_pred = model.predict(x_test)
 
-    return metrics(y_test, y_pred)
+    print('... training done.')
+
+    y_val_pred = model.predict(x_val)
+    y_test_pred = model.predict(x_test)
+
+    return {
+        'validation': metrics(y_val, y_val_pred),
+        'test': metrics(y_test, y_test_pred)
+    }
 
 
 def metrics(y_test, y_pred) -> dict:
@@ -277,9 +287,9 @@ def run():
     finalize_metrics({
         #"rf_metrics": random_forest(x_train, y_train, x_test, y_test),
         #"rf_split_metrics": random_forest_split(x_train, y_train)
-        "lr_metrics": logistic_regression(x_train, y_train, x_test, y_test),
+        #"lr_metrics": logistic_regression(x_train, y_train, x_test, y_test),
         #"lr_optimized": logistic_regression_optimized(x_train, y_train, x_test, y_test),
-        #"svc_metrics": svc(x_train, y_train, x_test, y_test)
+        "svc_metrics": svc(x_train, y_train, x_test, y_test)
     })
 
     print('... done')
