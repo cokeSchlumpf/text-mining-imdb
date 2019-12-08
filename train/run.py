@@ -107,13 +107,19 @@ def prepare_text_simplified(s: str) -> str:
 
     # remove stopwords
     s = s.lower()
-    s = str.join(' ', s.split()[:150])
     s = re.sub(REPLACE_NO_SPACE, '', s)
     s = re.sub(REPLACE_WITH_SPACE, ' ', s)
+
+    s = re.sub(r'\W', ' ', s)
+    s = re.sub(r'\s+[a-zA-Z]\s+', ' ', s)
+    s = re.sub(r'\^[a-zA-Z]\s+', ' ', s)
+    s = re.sub(r'\s+', ' ', s, flags=re.I)
+
+    s = str.join(' ', s.split()[:150])
     s = ' '.join([word for word in s.split() if word not in english_stop_words])
     s = ' '.join([stemmer.stem(word) for word in s.split()])
     s = ' '.join([lemmatizer.lemmatize(word) for word in s.split()])
-    s = str.join(' ', s.split()[:25])
+    s = str.join(' ', s.split()[:100])
 
     return s
 
@@ -124,7 +130,7 @@ def prepare_texts(documents: List[str]):
 
     from nltk.corpus import stopwords
 
-    vectorizer = CountVectorizer(max_features=500, min_df=0, max_df=0.7, stop_words=stopwords.words('english'), ngram_range=(2,2))
+    vectorizer = CountVectorizer(max_features=500, min_df=0, max_df=0.7, stop_words=stopwords.words('english'), ngram_range=(1,2))
     X = vectorizer.fit_transform(documents).toarray()
 
     tfidfconverter = TfidfTransformer()
