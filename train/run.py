@@ -269,7 +269,7 @@ def run():
     [print(f"{d}\n\n--\n\n") for d in documents_train[:3]]
 
     print('... feature extraction')
-    x_all = prepare_texts_binary(documents_train + documents_test)
+    x_all = prepare_texts_tfidf(documents_train + documents_test)
     x_train = x_all[:len(documents_train)]
     x_test = x_all[len(documents_train):]
 

@@ -4,7 +4,15 @@
 
 Download the [dataset](http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz) and place it in `data` directory. 
 
-## Summary of metrics
+## DVC
+
+This project uses DVC. To see results of several tries do:
+
+```batch
+$ dvc metrics show -a -T
+```
+
+Below you find a sample output of this command:
 
 ```
 working tree:
