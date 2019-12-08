@@ -116,11 +116,11 @@ def prepare_text_simplified(s: str) -> str:
     s = re.sub(r'\^[a-zA-Z]\s+', ' ', s)
     s = re.sub(r'\s+', ' ', s, flags=re.I)
 
-    s = str.join(' ', s.split()[:150])
+    #s = str.join(' ', s.split()[:150])
     s = ' '.join([word for word in s.split() if word not in english_stop_words])
     s = ' '.join([stemmer.stem(word) for word in s.split()])
     s = ' '.join([lemmatizer.lemmatize(word) for word in s.split()])
-    s = str.join(' ', s.split()[:100])
+    #s = str.join(' ', s.split()[:100])
 
     return s
 
@@ -144,7 +144,7 @@ def prepare_texts_binary(documents: List[str]):
     from sklearn.feature_extraction.text import CountVectorizer
     from sklearn.feature_extraction.text import TfidfTransformer
 
-    cv = CountVectorizer(max_features=500, binary=False, ngram_range=(1,3))
+    cv = CountVectorizer(max_features=500, binary=True, ngram_range=(1,3))
     cv.fit(documents)
 
     x = cv.transform(documents).toarray()
@@ -157,7 +157,7 @@ def prepare_texts_binary(documents: List[str]):
 def prepare_texts_tfidf(documents: List[str]):
     from sklearn.feature_extraction.text import TfidfVectorizer
 
-    tfidf_vectorizer = TfidfVectorizer(ngram_range=(1,3), binary=True)
+    tfidf_vectorizer = TfidfVectorizer(ngram_range=(1,2), binary=True)
     tfidf_vectorizer.fit(documents)
     x = tfidf_vectorizer.transform(documents)
 
